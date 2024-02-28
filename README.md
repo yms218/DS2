@@ -8,7 +8,7 @@ Airflow 설치 (WSL2 + docker 환경)
 
 - Docker 설치 - [[Docker] windows에 Docker 설치하기 (tistory.com)](https://hkim-data.tistory.com/16)
 
-Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행)
+Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 도커에서 주피터 노트북 원격 접속 방법](https://yeko90.tistory.com/entry/how-to-run-jupyter-docker)
 
 - 예제용 도커 이미지
   
