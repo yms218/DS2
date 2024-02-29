@@ -14,4 +14,20 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
   
   ```
   docker pull pytorch/pytorch
+  
+  docker run --rm -it pytorch/pytorch
+  
+  pip install jupyter
+  
+  docker ps # 컨테이너 확인 
+  
+  docker commit CONTAINER_ID
+  
+  docker images # 생성된 이미지 확인
+  
+  docker run -it --rm -p 5000:8888 jupyter
+  
+  jupyter notebook --ip 0.0.0.0 --allow-root
   ```
+
+- 
