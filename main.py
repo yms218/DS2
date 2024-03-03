@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -19,3 +20,4 @@ async def get_home(request: Request):
 async def get_jupyter(request: Request):
     # Jupyter Notebook을 띄우는 페이지를 렌더링합니다.
     return templates.TemplateResponse("jupyter.html", {"request": request})
+
