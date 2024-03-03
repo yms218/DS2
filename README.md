@@ -44,24 +44,25 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
   
   uvicorn main:app --reload --ssl-keyfile=D:\\web\\openssl\\key.pem --ssl-certfile=D:\\web\\openssl\\cert.pem
-  
-  
   ```
 
+```
 - Docker File 생성
-  
-  ```dockerfile
-  # Dockerfile
-  FROM jupyter
-  
-  # 인증서 복사 (선택적, 볼륨 마운트를 사용하는 경우 필요 없음)
-  COPY openssl/key.pem /etc/ssl/key.pem
-  COPY openssl/cert.pem /etc/ssl/cert.pem
-  
-  # Jupyter Notebook 시작 명령어
-  CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--allow-root", "--certfile=/etc/ssl/cert.pem", "--keyfile=/etc/ssl/key.>
-  ```
-  
-  - Docker build : docker build -t jupyter2 .
 
-            
+```dockerfile
+# Dockerfile
+FROM jupyter
+
+# 인증서 복사 (선택적, 볼륨 마운트를 사용하는 경우 필요 없음)
+COPY openssl/key.pem /etc/ssl/key.pem
+COPY openssl/cert.pem /etc/ssl/cert.pem
+
+# Jupyter Notebook 시작 명령어
+CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--allow-root", "--certfile=/etc/ssl/cert.pem", "--keyfile=/etc/ssl/key.>
+```
+
+- Docker build : docker build -t jupyter2 .
+- docker run -it --rm -p 5000:8888 jupyter2
+- docker exec -it <컨테이너ID_또는_이름> /bin/bash
+- jupyter notebook --generate-config
+- nano /root/.jupyter/jupyter_notebook_config.py         
