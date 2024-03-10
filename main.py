@@ -2,8 +2,19 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI()
+
+# CSP 헤더를 추가하는 미들웨어 클래스 정의
+class CustomHeaderMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers['Content-Security-Policy'] = "frame-ancestors 'self' http://127.0.0.1:8888"
+        return response
+
+# 미들웨어 추가
+app.add_middleware(CustomHeaderMiddleware)
 
 # Static 파일을 제공하기 위한 디렉토리 설정
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -20,4 +31,3 @@ async def get_home(request: Request):
 async def get_jupyter(request: Request):
     # Jupyter Notebook을 띄우는 페이지를 렌더링합니다.
     return templates.TemplateResponse("jupyter.html", {"request": request})
-

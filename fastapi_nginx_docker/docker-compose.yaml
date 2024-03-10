@@ -1,0 +1,31 @@
+version: '3.0'
+services:
+
+  nginx:
+    container_name: nginx-build # 컨테이너 이름
+    build: ./nginx # 빌드 디렉토리
+    ports: # inbound:outbound 포트번호
+      - "80:80"
+    restart: always
+    volumes:
+      - ./app:/app # 데이터 마운트
+    depends_on:
+      - fastapi # nginx가 배포하면서 web 서비스가 바로 배포되도록 연결
+
+
+
+  # FastAPI 서비스
+  fastapi:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: fastapi-build # 컨테이너 이름
+
+  # 배포하면서 실행할 명령어
+  command: gunicorn -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8000
+
+  restart: always
+  volumes:
+    - ./app:/app
+  expose:
+    - "8000" # gunicorn을 8000으로 열어놨기 때문에 포트도 동일하게

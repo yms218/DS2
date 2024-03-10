@@ -90,4 +90,4 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
   nano /root/.jupyter/jupyter_notebook_config.py
   ```
 
-- 
+- [Docker 활용하여 FastAPI + Nginx 배포 :: Like Sherlock Data Scientist](https://richdad-project.tistory.com/96)
