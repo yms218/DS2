@@ -69,7 +69,7 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
 - Docker Run
   
   ```
-  docker run -it --rm -p 5000:8888 jupyter2
+  docker run -it --rm -p 8888:8888 jupyter2
   ```
 
 - Docker container 접근
@@ -88,6 +88,51 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
   
   ```
   nano /root/.jupyter/jupyter_notebook_config.py
+  
+  
+  c = get_config()  #noqa
+  c.NotebookApp.tornado_settings = {
+          'headers':{
+                  'Content-Security-Policy':"frame-ancestors * 'self' "
+          }
+  }
   ```
 
 - [Docker 활용하여 FastAPI + Nginx 배포 :: Like Sherlock Data Scientist](https://richdad-project.tistory.com/96)
+
+Nginx 설치
+
+- sudo apt-get install nginx
+
+- FastAPI와 Nginx 연동을 위한 Config 파일 작성
+  
+      server {
+       listen 80;
+       server_name localhost;
+          location / {
+              proxy_pass http://localhost:8000;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+      
+          location /jupyter/ {
+              proxy_pass http://localhost:8888; # Jupyter Notebook 서버 주소
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+      
+              # CSP 헤더 설정 예제
+              add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';";
+          }
+      }
+
+- sites-available의 fastapi.conf 파일을 sites-enabled에 심볼릭 링크 생성
+  
+  ```
+  sudo ln -s /etc/nginx/sites-available/fastapi.conf /etc/nginx/sites-enabled/fastapi.conf
+  ```
+  
+  

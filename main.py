@@ -6,15 +6,15 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI()
 
-# CSP 헤더를 추가하는 미들웨어 클래스 정의
-class CustomHeaderMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        response = await call_next(request)
-        response.headers['Content-Security-Policy'] = "frame-ancestors 'self' http://127.0.0.1:8888"
-        return response
 
-# 미들웨어 추가
-app.add_middleware(CustomHeaderMiddleware)
+# CORS 설정
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 실제 배포에서는 보다 안전한 설정을 사용하세요
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Static 파일을 제공하기 위한 디렉토리 설정
 app.mount("/static", StaticFiles(directory="static"), name="static")
