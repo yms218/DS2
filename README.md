@@ -52,12 +52,22 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
   # Dockerfile
   FROM jupyter
   
-  # 인증서 복사 (선택적, 볼륨 마운트를 사용하는 경우 필요 없음)
-  COPY openssl/key.pem /etc/ssl/key.pem
-  COPY openssl/cert.pem /etc/ssl/cert.pem
+  # 패키지 리스트 업데이트 및 nano 텍스트 편집기 설치
+  USER root
+  RUN apt-get update && apt-get install -y nano
+  
+  # Jupyter Notebook 설정 파일 생성 및 수정
+  RUN jupyter notebook --generate-config && \
+      echo "c.NotebookApp.tornado_settings = {" >> /root/.jupyter/jupyter_notebook_config.py && \
+      echo "    'headers': {" >> /root/.jupyter/jupyter_notebook_config.py && \
+      echo "        'Content-Security-Policy': \"frame-ancestors * 'self' \"" >> /root/.jupyter/jupyter_notebook_config.py && \
+      echo "    }" >> /root/.jupyter/jupyter_notebook_config.py && \
+      echo "}" >> /root/.jupyter/jupyter_notebook_config.py && \
+      echo "c.NotebookApp.token = ''" >> /root/.jupyter/jupyter_notebook_config.py && \
+      echo "c.NotebookApp.password = ''" >> /root/.jupyter/jupyter_notebook_config.py
   
   # Jupyter Notebook 시작 명령어
-  CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--allow-root", "--certfile=/etc/ssl/cert.pem", "--keyfile=/etc/ssl/key.>
+  CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--allow-root"]
   ```
 
 - Docker Build
@@ -89,6 +99,9 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
   ```
   nano /root/.jupyter/jupyter_notebook_config.py
   
+  jupyter notebook password # 비밀번호 생성
+  
+  nano /root/.jupyter/jupyter_server_config.json
   
   c = get_config()  #noqa
   c.NotebookApp.tornado_settings = {
@@ -96,6 +109,8 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
                   'Content-Security-Policy':"frame-ancestors * 'self' "
           }
   }
+  c.NotebookApp.token=''
+  c.NotebookApp.password=''
   ```
 
 - [Docker 활용하여 FastAPI + Nginx 배포 :: Like Sherlock Data Scientist](https://richdad-project.tistory.com/96)
@@ -134,5 +149,9 @@ Nginx 설치
   ```
   sudo ln -s /etc/nginx/sites-available/fastapi.conf /etc/nginx/sites-enabled/fastapi.conf
   ```
+
+- docker-compose 명령어
   
+  ```
   
+  ```
