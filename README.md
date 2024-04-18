@@ -113,45 +113,20 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
   c.NotebookApp.password=''
   ```
 
+- 
+
 - [Docker 활용하여 FastAPI + Nginx 배포 :: Like Sherlock Data Scientist](https://richdad-project.tistory.com/96)
 
-Nginx 설치
+FastAPI - Vue.js 연동
 
-- sudo apt-get install nginx
-
-- FastAPI와 Nginx 연동을 위한 Config 파일 작성
+- vue.config.js 파일 설정 
   
-      server {
-       listen 80;
-       server_name localhost;
-          location / {
-              proxy_pass http://localhost:8000;
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-          }
-      
-          location /jupyter/ {
-              proxy_pass http://localhost:8888; # Jupyter Notebook 서버 주소
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-      
-              # CSP 헤더 설정 예제
-              add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';";
-          }
-      }
-
-- sites-available의 fastapi.conf 파일을 sites-enabled에 심볼릭 링크 생성
+  public path를 vue로 추가해준다
   
   ```
-  sudo ln -s /etc/nginx/sites-available/fastapi.conf /etc/nginx/sites-enabled/fastapi.conf
-  ```
-
-- docker-compose 명령어
-  
-  ```
-  
+  const { defineConfig } = require('@vue/cli-service');
+  module.exports = defineConfig({
+    transpileDependencies: true,
+    publicPath: process.env.NODE_ENV === 'production' ? '/vue/' : '/'
+  });
   ```
