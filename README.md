@@ -113,8 +113,6 @@ Jupyter notebook(Docker Image 다운로드 후 컨테이너 실행) - [[Docker] 
   c.NotebookApp.password=''
   ```
 
-- 
-
 - [Docker 활용하여 FastAPI + Nginx 배포 :: Like Sherlock Data Scientist](https://richdad-project.tistory.com/96)
 
 FastAPI - Vue.js 연동
@@ -129,4 +127,28 @@ FastAPI - Vue.js 연동
     transpileDependencies: true,
     publicPath: process.env.NODE_ENV === 'production' ? '/vue/' : '/'
   });
+  ```
+
+JupyterHub 설치
+
+- 초기 환경 구축
+  
+  ```
+  # jupyterhub config 파일 생성
+  jupyterhub --generate-config
+  
+  # jupyterhub_config.py 
+  c.JupyterHub.port = 8888
+  c.Authenticator.admin_users = {'admin'}
+  c.PAMAuthenticator.admin_groups = {'masterG'}
+  
+  # package 설치
+  apt-get install python3 python3-pip 
+  python3 -m pip install jupyterhub notebook jupyterlab
+  
+  # user 추가
+  adduser admin 
+  
+  # http://xxx.xxx.xxx.xxx:8888/hub/admin#/   관리자페이지 접근 URL (관리자 로그인 후 )
+  
   ```
