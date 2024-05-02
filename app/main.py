@@ -1,5 +1,6 @@
 # app.py
 import mlflow
+import requests
 import pandas as pd
 from schemas import PredictIn, PredictOut
 from fastapi import FastAPI, Request, HTTPException
@@ -32,6 +33,7 @@ USER_DB = {}
 
 # Fail response
 NAME_NOT_FOUND = HTTPException(status_code=400, detail="Name not found.")
+MLFLOW_API_URL = "http://localhost:5001/api/2.0/mlflow/"
 
 # CORS 설정
 app.add_middleware(
@@ -55,6 +57,12 @@ templates = Jinja2Templates(directory="./windzo/dist")
 async def vue_home(request: Request):
     # 홈페이지를 렌더링합니다.
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+params = {
+    'run_id': '1f5044a375c64bd3b28a95a93e2ea4e5',
+    'path': ''  
+}
 
 # fastAPI CRUD
 @app.post("/users", response_model=CreateOut)
@@ -94,3 +102,13 @@ def predict(data: PredictIn) -> PredictOut:
     df = pd.DataFrame([data.dict()])
     pred = MODEL.predict(df).item()
     return PredictOut(iris_class=pred)
+
+@app.get("/models")
+def get_models():
+    response = requests.get(MLFLOW_API_URL + 'registered-models/search')
+    return response.json()
+
+@app.get("/artifacts")
+def get_artifacts():
+    response = requests.get(MLFLOW_API_URL + 'artifacts/list', params=params)
+    return response.json()
