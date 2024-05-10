@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  jupyterhub:
+    image: jupyterhub2
+    container_name: jupyterhub
+    restart: always
+    ports:
+      - '8888:8888'
+    command: jupyterhub  
+    stdin_open: true  
+    tty: true  
+    volumes:
+      # - /data:/home
+      - ./jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+
+
+
+
+
+# services:
+#   jupyterhub:
+#     image: jupyterhub1
+#     container_name: jupyterhub
+#     restart: always
+#     ports:
+#       - '8888:8888'
+#     command: jupyterhub  # 컨테이너 내에서 JupyterHub 실행
+#     stdin_open: true  # 컨테이너 내에서 stdin 열기 (대화형)
+#     tty: true  # tty 할당
+#     depends_on:
+#       - gitlab  # JupyterHub 서비스가 GitLab 서비스에 의존함
+#     networks:
+#       - internal_network
+
+
+#   gitlab:
+#     image: gitlab
+#     container_name: gitlab
+#     restart: always
+#     hostname: gitlab.example.com
+#     ports:
+#       - '9080:80'  # 외부 접근 포트 9080을 컨테이너의 80 포트에 연결
+#       - '10022:22'  # SSH 포트 매핑
+#     volumes:
+#       - /var/gitlab/config:/etc/gitlab
+#       - /var/gitlab/logs:/var/log/gitlab
+#       - /var/gitlab/data:/var/opt/gitlab
+#     environment:
+#       GITLAB_OMNIBUS_CONFIG: |
+#         external_url 'http://gitlab.example.com'
+#         gitlab_rails['gitlab_shell_ssh_port'] = 10022
+#     networks:
+#       - internal_network
+
+# networks:
+#   internal_network:
+#     driver: bridge
+
+
+
+
+    

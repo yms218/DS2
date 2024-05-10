@@ -1,9 +1,12 @@
 # app.py
+import markdown
+import base64
 import mlflow
 import requests
 import pandas as pd
 from schemas import PredictIn, PredictOut
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,9 +34,11 @@ app = FastAPI()
 # User database
 USER_DB = {}
 
-# Fail response
+# config
 NAME_NOT_FOUND = HTTPException(status_code=400, detail="Name not found.")
 MLFLOW_API_URL = "http://localhost:5001/api/2.0/mlflow/"
+GITHUB_TOKEN = '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'
+
 
 # CORS 설정
 app.add_middleware(
@@ -112,3 +117,21 @@ def get_models():
 def get_artifacts():
     response = requests.get(MLFLOW_API_URL + 'artifacts/list', params=params)
     return response.json()
+
+
+@app.get("/github/{owner}/{repo}/readme")
+def get_github_readme(owner: str, repo: str):
+    """GitHub 리포지토리의 README 파일 내용을 반환합니다."""
+    headers = {'Authorization': f'token {GITHUB_TOKEN}'}
+    url = f"https://api.github.com/repos/{owner}/{repo}/readme"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        readme_data = response.json()
+        readme_content = base64.b64decode(readme_data['content']).decode('utf-8')
+        
+        # Markdown을 HTML로 변환, fenced_code 확장 사용
+        html_content = markdown.markdown(readme_content, extensions=['fenced_code', 'codehilite'])
+        
+        return HTMLResponse(content=html_content, status_code=200)
+    else:
+        raise HTTPException(status_code=response.status_code, detail="README not found")
