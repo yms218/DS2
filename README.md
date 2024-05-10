@@ -134,21 +134,72 @@ JupyterHub 설치
 - 초기 환경 구축
   
   ```
+  docker run -it -p 8888:8888 --name jupyterhub jupyterhub/jupyterhu
+  b bash
+  
   # jupyterhub config 파일 생성
   jupyterhub --generate-config
+  
+  # package 설치
+  apt-get update
+  apt-get install nano
+  apt-get install python3 python3-pip 
+  python3 -m pip install jupyterhub notebook jupyterlab
   
   # jupyterhub_config.py 
   c.JupyterHub.port = 8888
   c.Authenticator.admin_users = {'admin'}
   c.PAMAuthenticator.admin_groups = {'masterG'}
   
-  # package 설치
-  apt-get install python3 python3-pip 
-  python3 -m pip install jupyterhub notebook jupyterlab
-  
   # user 추가
   adduser admin 
   
   # http://xxx.xxx.xxx.xxx:8888/hub/admin#/   관리자페이지 접근 URL (관리자 로그인 후 )
+  ```
+
+Gitlab 설치
+
+- 사전작업
   
   ```
+  sudo apt install nginx
+  
+  sudo systemctl enable nginx
+  sudo systemctl restart nginx
+  
+  sudo mkdir -p /var/gitlab/{data,logs,config}
+  export GITLAB_HOME=/var/gitlab
+  
+  # hostname : 실제 도메인으로 변경
+  sudo docker run --detach \
+   --hostname gitlab.example.com \
+   --publish 9080:80 --publish 10022:22 \
+   --name gitlab \
+   --restart always \
+   --volume $GITLAB_HOME/config:/etc/gitlab \
+   --volume $GITLAB_HOME/logs:/var/log/gitlab \
+   --volume $GITLAB_HOME/data:/var/opt/gitlab \
+   gitlab/gitlab-ce:latest
+  ```
+
+- 관리자(root) 비밀번호 변경
+  
+  ```
+  # /etc/gitlab/gitlab.rb
+  sudo docker exec -it gitlab /bin/bash
+  gitlab_rails['gitlab_shell_ssh_port'] = 10022
+  
+  docker exec -it gitlab /bin/bash
+  gitlab-rails console -e production
+  user = User.where(id:1).first
+  
+  > user.password='변경할비밀번호'
+  > user.password_confirmation='변경할비밀번호' 
+  > user.save
+  ```
+
+
+
+```
+
+```
