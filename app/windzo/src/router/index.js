@@ -9,11 +9,14 @@ import Vbadges from "../views/components/badges.vue";
 import Vbreadcumb from "../views/components/breadcumbs.vue";
 import Vbutton from "../views/components/button.vue";
 import Vcard from "../views/components/card.vue";
+import Vcardtab from "../views/components/model_tab.vue";
 import Vdropdown from "../views/components/dropdown.vue";
 import Vmodal from "../views/components/modal.vue";
+import CreateRepoPage from "../views/components/create_repo.vue";
 import Login from "../views/layouts/auth/Login.vue";
 import Register from "../views/layouts/auth/Register.vue";
 import ForgotPassword from "../views/layouts/auth/forgot-password.vue";
+
 
 // layouts
 import Blank from "../views/layouts/Blank.vue";
@@ -74,6 +77,13 @@ const routes = [
     meta: { title: "Card" + appname },
   },
   {
+    path: "/component/card/tab",
+    name: "Vcardtab",
+    component: Vcardtab,
+    props: route => ({ repo: route.query.repo }),
+    meta: { title: "Cardtab" + appname },
+  },
+  {
     path: "/component/dropdown",
     name: "Vdropdown",
     component: Vdropdown,
@@ -85,6 +95,13 @@ const routes = [
     component: Vmodal,
     meta: { title: "Modal" + appname },
   },
+  {
+    path: "/component/card/create-model",
+    name: "CreateRepoPage",
+    component: CreateRepoPage,
+    meta: { title: "CreateRepoPage" + appname },
+  },
+  
   // layouts
 
   {

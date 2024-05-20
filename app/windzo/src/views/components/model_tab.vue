@@ -1,18 +1,28 @@
 <template>
   <div class="h-screen p-5 flex flex-col justify-start items-center dark:text-white text-gray-700">
-    <div class="tabs">
+    <div class="tabs relative w-full">
       <button class="tab-button" :class="{ active: currentTab === 'readme' }" @click="currentTab = 'readme'">Readme</button>
       <button class="tab-button" :class="{ active: currentTab === 'repository' }" @click="currentTab = 'repository'">Repository</button>
+      <div v-if="currentTab === 'readme'" class="absolute top-0 right-0 flex">
+        <button v-if="!editing" class="edit-button" @click="editReadme">Edit</button>
+        <button v-if="editing" class="edit-button" @click="saveReadme">Save</button>
+        <button v-if="editing" class="edit-button" @click="cancelEdit">Cancel</button>
+      </div>
     </div>
     <div class="tab-content">
-      <div v-if="currentTab === 'readme'" class="tab-pane">
-        <iframe
-          v-if="iframeUrl"
-          frameborder="0"
-          style="width:100%; height:100%;"
-          :src="iframeUrl"
-          allow="clipboard-write"
-        ></iframe>
+      <div v-if="currentTab === 'readme'" class="tab-pane readme-content">
+        <div v-if="!editing">
+          <iframe
+            v-if="iframeUrl"
+            frameborder="0"
+            style="width:100%; height:calc(100vh - 150px);" 
+            :src="iframeUrl"
+            allow="clipboard-write"
+          ></iframe>
+        </div>
+        <div v-if="editing" class="readme-edit">
+          <textarea v-model="readmeContent" class="textarea"></textarea>
+        </div>
       </div>
       <div v-if="currentTab === 'repository'" class="tab-pane">
         <div class="repository-container">
@@ -25,10 +35,8 @@
             <div class="clone-container">
               <input type="text" class="clone-url" :value="cloneUrl" readonly />
               <button class="clone-button" @click="copyCloneUrl">
-                <svg class="clone-icon" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M0 1.75A.75.75 0 01.75 1h13.5a.75.75 0 010 1.5H13v12a.75.75 0 01-.75.75H1.75A.75.75 0 011 14.5V2h-.25A.75.75 0 010 1.75zM2 3.5v10.25h10.5V3.5H2zm10.75-2h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 010-1.5zM1 3.5h10.5V14H1V3.5zM3.5 0a.75.75 0 01.75.75v1.5A.75.75 0 013.5 3h-2a.75.75 0 010-1.5h1.25V.75A.75.75 0 013.5 0zm9.5 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0113 0zm1.5 12.75A.75.75 0 0114 12h1.5a.75.75 0 010 1.5H14a.75.75 0 01-.75-.75zm-.75-9.75a.75.75 0 011.5 0v1.5a.75.75 0 01-1.5 0V3zM.75 9A.75.75 0 010 8.25v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 01.75 9zM0 4.75A.75.75 0 01.75 4h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 010 4.75z"></path>
-                </svg>
-                Clone
+                <span v-if="!copied">Clone</span>
+                <span v-else class="text-green-600">&#10003; Copied</span>
               </button>
             </div>
           </div>
@@ -60,7 +68,11 @@ export default {
     return {
       currentTab: 'readme',
       scriptLoaded: false,
-      iframeUrl: ''
+      iframeUrl: '',
+      copied: false,
+      editing: false,
+      readmeContent: '',
+      readmeSha: ''
     };
   },
   computed: {
@@ -85,7 +97,10 @@ export default {
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
-      alert('Clone URL copied to clipboard!');
+      this.copied = true;
+      setTimeout(() => {
+        this.copied = false;
+      }, 2000); // 2 seconds later, reset the copied state
     },
     loadRepoScript() {
       const script = document.createElement('script');
@@ -112,6 +127,38 @@ export default {
       } catch (error) {
         console.error('Failed to fetch README link:', error);
       }
+    },
+    async fetchReadmeContent() {
+      try {
+        const response = await axios.get(`http://localhost:8000/repos/${this.owner}/${this.repoName}/file`, {
+          params: {
+            path: 'README.md'
+          }
+        });
+        this.readmeContent = atob(response.data.content);
+        this.readmeSha = response.data.sha;
+      } catch (error) {
+        console.error('Failed to fetch README content:', error);
+      }
+    },
+    editReadme() {
+      this.editing = true;
+      this.fetchReadmeContent();
+    },
+    cancelEdit() {
+      this.editing = false;
+    },
+    async saveReadme() {
+      try {
+        const response = await axios.put(`http://localhost:8000/github/update-readme?owner=${this.owner}&repo=${this.repoName}`, {
+          content: this.readmeContent,
+          sha: this.readmeSha
+        });
+        this.editing = false;
+        this.fetchReadmeLink(); // Refresh the iframe content
+      } catch (error) {
+        console.error('Failed to update README:', error);
+      }
     }
   },
   watch: {
@@ -124,7 +171,6 @@ export default {
     }
   },
   created() {
-    // repo 값이 유효한지 확인
     if (!this.repo) {
       console.error('repo 값이 전달되지 않았습니다.');
     } else {
@@ -142,6 +188,7 @@ export default {
   justify-content: flex-start;
   margin-bottom: 10px;
   border-bottom: 2px solid #e0e0e0;
+  position: relative;
 }
 .tab-button {
   padding: 10px 15px;
@@ -160,6 +207,21 @@ export default {
 .tab-button:not(.active):hover {
   color: #555;
 }
+.edit-button {
+  padding: 5px 10px;
+  margin-left: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+.edit-button:hover {
+  background-color: #e0e0e0;
+}
 .tab-content {
   width: 100%;
   height: calc(100vh - 150px); /* Adjusted height to account for tabs */
@@ -168,33 +230,22 @@ export default {
   width: 100%;
   height: 100%;
 }
-
-.repository-container {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 10px;
-  width: 100%;
+.readme-content {
+  position: relative;
+}
+.readme-edit {
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  margin: 0 auto;
-  background-color: #ffffff;
 }
-.repository-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.breadcrumbs {
-  display: flex;
-  align-items: center;
-  color: #0366d6;
-}
-.breadcrumbs span {
-  margin-right: 5px;
-  cursor: pointer;
-}
-.breadcrumbs span:hover {
-  text-decoration: underline;
+.textarea {
+  flex: 1;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: none;
+  font-size: 16px;
 }
 .clone-container {
   display: flex;
@@ -211,16 +262,22 @@ export default {
   width: 300px;
 }
 .clone-button {
-  display: flex;
-  align-items: center;
-  color: #0366d6;
+  display: inline-block;
+  padding: 5px 10px;
+  color: #555;
   text-decoration: none;
   font-weight: bold;
-  background: none;
-  border: none;
+  background-color: #f6f8fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
-.clone-icon {
-  margin-right: 5px;
+.clone-button:hover {
+  background-color: #e1e4e8;
+}
+.repository-container {
+  background-color: transparent;
+  border: none;
 }
 </style>

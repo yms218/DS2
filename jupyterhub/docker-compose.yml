@@ -2,17 +2,22 @@ version: '3.8'
 
 services:
   jupyterhub:
-    image: jupyterhub2
+    image: jupyterhub
     container_name: jupyterhub
     restart: always
+    user: root 
     ports:
       - '8888:8888'
-    command: jupyterhub  
+    command: jupyterhub
     stdin_open: true  
     tty: true  
+    environment:
+      - GRANT_SUDO=yes
+      - JUPYTER_ALLOW_INSECURE_WRITES=true
     volumes:
-      # - /data:/home
+      # - ./home:/tmp
       - ./jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+
 
 
 

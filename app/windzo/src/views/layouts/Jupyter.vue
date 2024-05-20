@@ -9,48 +9,50 @@
         Create Model
       </button>
     </div>
-    <!-- HTML 컨텐츠 렌더링 -->
-    <div class="readme-container markdown-body" v-html="readmeHtml"></div>
+    <!-- GitHub 리포지토리 카드를 동적으로 생성 -->
+    <div v-for="repo in repositories" :key="repo" class="repo-card" :data-repo="repo"></div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import 'github-markdown-css'
-
 export default {
+  name: 'RepoCardComponent',
   data() {
     return {
-      readmeHtml: '', // HTML 컨텐츠 저장
+      // 리포지토리 목록을 저장
+      repositories: [
+                      "yms218/Code-Up-Algorithm",
+                      "yms218/Deep-Learning",
+                      "yms218/DS-SNU-12th-Project",
+                      "yms218/DS2",
+                      "yms218/Embeded-Lecture",
+                      "yms218/linux",
+                      "yms218/MLOps",
+                      "yms218/POSCO_9th_A_Algorithm"
+                    ]
     };
+  },
+  mounted() {
+    this.loadRepoScript();
   },
   methods: {
     openUrl() {
-      window.open('http://127.0.0.1:8888/', '_blank');
+      window.open('http://127.0.0.1:8888/hub', '_blank');
     },
-    fetchReadme() {
-      axios.get('http://localhost:5000/github/yms218/DS2/readme')
-        .then(response => {
-          this.readmeHtml = response.data;  // 서버로부터 받은 HTML을 저장
-        })
-        .catch(error => {
-          console.error('Error fetching README:', error);
-          this.readmeHtml = '<p>Error loading README content.</p>';
-        });
+    loadRepoScript() {
+      const script = document.createElement('script');
+      script.src = 'https://tarptaeya.github.io/repo-card/repo-card.js';
+      script.onload = () => {
+        if (window.tarptaeya && window.tarptaeya.reloadRepoCards) {
+          window.tarptaeya.reloadRepoCards();
+        }
+      };
+      document.head.appendChild(script);
     }
-  },
-  mounted() {
-    this.fetchReadme();  // 컴포넌트 마운트 시 README 로드
   }
 }
 </script>
 
 <style>
-.readme-container {
-  padding: 20px;
-  /* background: #f1adad;
-  border: 1px solid #ddd; */
-  overflow-y: auto; 
-  max-height: 70vh; 
-}
+/* 여기에 필요한 스타일을 추가할 수 있습니다 */
 </style>

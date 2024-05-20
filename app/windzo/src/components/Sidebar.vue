@@ -17,7 +17,7 @@
           class="text-2xl font-normal ml-3 mt-2 text-gray-800 dark:text-gray-200"
           translate="no"
         >
-          Windzo<span class="text-primary">.</span>
+          DS MLOps<span class="text-primary">.</span>
         </h2>
       </router-link>
       <div

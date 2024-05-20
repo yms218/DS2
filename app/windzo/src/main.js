@@ -10,6 +10,7 @@ import "./assets/tailwind.css";
 import "./assets/animate.css";
 import "./assets/sass/css/windzo.css";
 import vClickOutside from "click-outside-vue3";
+import './repo.js'; 
 
 const app = createApp(App);
 app.use(router);
