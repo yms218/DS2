@@ -154,9 +154,9 @@
               />
             </div>
             <div class="text-left lg:block md:block hidden">
-              <h2 class="dark:text-white text-gray-800">Hi, Sahrul</h2>
+              <h2 class="dark:text-white text-gray-800">Hi, jyc</h2>
               <p class="text-xs text-gray-400 dark:text-gray-500">
-                Frontend Developer
+                MLOps Developer
               </p>
             </div>
             <!-- <span class="text-md mt-4 text-gray-300"
